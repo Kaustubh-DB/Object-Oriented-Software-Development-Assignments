@@ -1,14 +1,22 @@
 package application;
 
 import javafx.application.Application;
+import javafx.geometry.Pos;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Label;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Text;
 import javafx.animation.Timeline;
+
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 
 import javafx.animation.KeyFrame;
 import javafx.util.Duration;
@@ -36,7 +44,11 @@ public class Main extends Application {
 	private boolean ballUp = true, ballLeft = false;
 	private UserAction action = UserAction.NONE;
 	private Timeline timeline = new Timeline();
+	private Timeline timeline2 = new Timeline();
+
 	private boolean running = true;
+
+	Label timerLabel = new Label();
 
 	private Parent createContent() {
 		Pane root = new Pane();
@@ -50,7 +62,31 @@ public class Main extends Application {
 		brick.setTranslateY(APP_H - 100);
 		brick.setFill(Color.DARKRED);
 
-		root.getChildren().addAll(ball, bat, brick);
+		DateTimeFormatter SHORT_TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm:ss");
+
+		timerLabel.setText(LocalTime.now().format(SHORT_TIME_FORMATTER));
+		timerLabel.setTranslateX(APP_W - 70);
+		timerLabel.setTranslateY(APP_H - 600);
+/*		long endTime = 300;
+		Label timeLabel = new Label();*/
+
+		root.getChildren().addAll(ball, bat, brick, timerLabel);
+
+		KeyFrame frame2 = new KeyFrame(Duration.seconds(1), e -> {
+
+			timerLabel.setText(LocalTime.now().format(SHORT_TIME_FORMATTER));
+
+//			timerLabel.setText(counter.toString());
+		});
+
+		/*
+		 * DateFormat timeFormat = new SimpleDateFormat( "HH:mm:ss" ); final Timeline
+		 * timeline3 = new Timeline( new KeyFrame( Duration.millis( 1 ), event -> {
+		 * final long diff = endTime - System.currentTimeMillis(); if ( diff < 0 ) { //
+		 * timeLabel.setText( "00:00:00" ); timeLabel.setText( timeFormat.format( 0 ) );
+		 * } else { timeLabel.setText( timeFormat.format( diff ) ); } } ) );
+		 * timeline3.setCycleCount( Animation.INDEFINITE ); timeline3.play();
+		 */
 
 		KeyFrame frame = new KeyFrame(Duration.seconds(0.016), event -> {
 			if (!running)
@@ -131,7 +167,10 @@ public class Main extends Application {
 		});
 
 		timeline.getKeyFrames().add(frame);
+		timeline2.getKeyFrames().add(frame2);
+
 		timeline.setCycleCount(Timeline.INDEFINITE);
+		timeline2.setCycleCount(Timeline.INDEFINITE);
 		return root;
 
 	}
@@ -143,8 +182,18 @@ public class Main extends Application {
 
 	private void stopGame() {
 		// TODO Auto-generated method stub
+		
+		Stage dialogStage = new Stage();
+		dialogStage.initModality(Modality.WINDOW_MODAL);
+		VBox vbox = new VBox(new Text("GAME OVER"));
+		vbox.setAlignment(Pos.CENTER);
+		//vbox.setPadding(new Insets(50));
+		dialogStage.setScene(new Scene(vbox));
+		dialogStage.show();
+		
 		running = false;
 		timeline.stop();
+		timeline2.stop();
 	}
 
 	private void startGame() {
@@ -154,6 +203,7 @@ public class Main extends Application {
 		ball.setTranslateY(APP_H / 2);
 
 		timeline.play();
+		timeline2.play();
 		running = true;
 	}
 
